@@ -1,16 +1,13 @@
 require('dotenv').config()
 
 const express = require("express");
-const fetch = require('node-fetch')
 const cors = require('cors')
 const app = express();
 const google = require('./adapters/google')
-const users = require('./adapters/usersMySql')
 const streamsAdapter = require('./adapters/streamsS3')
 const s3Adapter = require('./adapters/s3')
 const jwt = require('jsonwebtoken')
 var bodyParser = require("body-parser");
-const { json } = require("body-parser");
 
 const JWT_SECRET = process.env.JWT_SECRET
 
