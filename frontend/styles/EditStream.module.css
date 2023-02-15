@@ -1,0 +1,30 @@
+.editStream {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.editStream input {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.editStream textarea {
+  width: 100%;
+  height: 5rem;
+  margin: 10px 0;
+}
+
+.deleteButton {
+  margin-top: 30px;
+}
+
+.bottom {
+  margin: 40px 0;
+}
+.bottom img {
+  width: 50%;
+  margin: 0 auto;
+  display: block;
+}

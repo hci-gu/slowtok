@@ -1,0 +1,24 @@
+.addStream {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.addStream input {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.addStream textarea {
+  width: 100%;
+  height: 5rem;
+  margin: 10px 0;
+}
+
+.bottom {
+  margin: 40px 0;
+}
+.bottom img {
+  width: 100%;
+}

@@ -1,0 +1,22 @@
+.header {
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.headerContent {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 0 5px 0px;
+  color: rgb(180,180,180);
+  display: flex;
+}
+
+.headerTitle {
+  flex: 1;
+}
+
+.headerActions {
+  flex: 0;
+}

@@ -1,0 +1,26 @@
+{
+  "name": "hydroponics-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && next export",
+    "start": "next start",
+    "deploy": "npm run build && aws s3 sync out/ s3://hydroponics-rost-home/ --acl public-read"
+  },
+  "dependencies": {
+    "dayjs": "^1.9.7",
+    "next": "10.0.4",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-google-login": "^5.2.2",
+    "react-icons": "^4.2.0",
+    "react-transition-group": "^4.4.1",
+    "react-use-googlelogin": "^0.12.5",
+    "use-hash": "^1.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.17.0",
+    "eslint-plugin-react": "^7.22.0"
+  }
+}
