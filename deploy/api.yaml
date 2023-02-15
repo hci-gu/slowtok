@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slowtok-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slowtok-api
+  template:
+    metadata:
+      labels:
+        app: slowtok-api
+    spec:
+      containers:
+        - name: slowtok-api
+          image: 'appademin/slowtok-api:0.0.1'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+              name: web
+              protocol: TCP
+          env:
+          - name: NODE_ENV
+            value: production
+          - name: ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: slowtok-secret
+                key: bucket-access-key
+          - name: SECRET
+            valueFrom:
+              secretKeyRef:
+                name: slowtok-secret
+                key: bucket-secret
+          - name: BUCKET_NAME
+            value: slowtok
+          - name: REGION
+            value: eu-north-1
+          - name: GOOGLE_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: slowtok-secret
+                key: google-client-id 
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: slowtok-secret
+                key: google-client-secret
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: slowtok-secret
+                key: jwt-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slowtok-api-service
+spec:
+  selector:
+    app: slowtok-api
+  ports:
+    - protocol: TCP
+      port: 4000

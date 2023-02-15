@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slowtok-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slowtok-web
+  template:
+    metadata:
+      labels:
+        app: slowtok-web
+    spec:
+      containers:
+        - name: slowtok-web
+          image: 'appademin/slowtok-web:0.0.1'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: web
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slowtok-web-service
+spec:
+  selector:
+    app: slowtok-web
+  ports:
+    - protocol: TCP
+      port: 3000
