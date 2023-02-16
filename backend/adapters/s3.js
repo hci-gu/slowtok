@@ -169,6 +169,7 @@ const setMetadata = ({ key, metadata }) =>
       Key: key,
       CopySource: `${S3_BUCKET}/${key}`,
       Metadata: metadata,
+      MetadataDirective: 'REPLACE',
     }
     s3.copyObject(params, (err, data) => {
       if (err) {
