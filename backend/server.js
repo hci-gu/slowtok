@@ -8,6 +8,7 @@ const streamsAdapter = require('./adapters/streamsS3')
 const s3Adapter = require('./adapters/s3')
 const jwt = require('jsonwebtoken')
 var bodyParser = require("body-parser");
+const { verifyToken } = require('./auth')
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -121,8 +122,8 @@ const getToken = async (req, res) => {
 
   if (googleTokenId) {
     try {
-      const data = await google.verifyAndParseToken(googleTokenId)
-      // const user = await users.getOrCreateUser(data.email)
+      // const data = await google.verifyAndParseToken(googleTokenId)
+      const data = verifyToken(googleTokenId)
       const user = {
         id: data.email,
         email: data.email,
