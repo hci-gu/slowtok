@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.slowtok_camera">
    <application
-        android:label="slowtok_camera"
+        android:label="SlowTok"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
