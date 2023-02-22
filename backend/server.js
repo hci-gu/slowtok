@@ -123,7 +123,7 @@ const getToken = async (req, res) => {
   if (googleTokenId) {
     try {
       // const data = await google.verifyAndParseToken(googleTokenId)
-      const data = verifyToken(googleTokenId)
+      const data = await verifyToken(googleTokenId)
       const user = {
         id: data.email,
         email: data.email,
