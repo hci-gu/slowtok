@@ -39,7 +39,9 @@ class SignInScreen extends ConsumerWidget {
                     var token = await fetchToken(googleAuth.idToken!);
                     ref.read(authProvider.notifier).state = token;
                   }
-                } catch (_) {}
+                } catch (e) {
+                  print(e);
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.all(8.0),

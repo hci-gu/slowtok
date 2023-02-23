@@ -39,3 +39,6 @@ final streamsProvider = FutureProvider<List<Stream>>((ref) {
 });
 
 final streamProvider = StateProvider<Stream?>((ref) => null);
+
+final durationProvider =
+    StateProvider<Duration>((ref) => const Duration(minutes: 5));

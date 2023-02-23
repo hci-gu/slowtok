@@ -11,9 +11,6 @@ import 'package:slowtok_camera/cameras.dart';
 import 'package:slowtok_camera/models.dart';
 import 'package:image/image.dart' as img;
 
-// ignore: constant_identifier_names
-const INTERVAL_DURATION = Duration(minutes: 5);
-
 void useInterval(VoidCallback callback, Duration delay) {
   final savedCallback = useRef(callback);
   savedCallback.value = callback;
@@ -33,6 +30,7 @@ class StreamScreen extends HookConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ValueNotifier<bool> showViewFinder = useState(true);
     ValueNotifier<bool> hasAccess = useState(false);
     ValueNotifier<bool> capturing = useState(false);
     ValueNotifier<XFile?> lastImage = useState(null);
@@ -42,7 +40,6 @@ class StreamScreen extends HookConsumerWidget {
       controller = CameraController(cameras[0], ResolutionPreset.medium);
       controller!.initialize().then((_) {
         hasAccess.value = true;
-        controller?.pausePreview();
       });
       return () {
         controller?.dispose();
@@ -53,7 +50,7 @@ class StreamScreen extends HookConsumerWidget {
       if (!hasAccess.value || controller == null) return;
 
       try {
-        if (controller!.value.isPreviewPaused) {
+        if (controller?.value != null && controller!.value.isPreviewPaused) {
           await controller!.resumePreview();
           // give the camera some time to focus
           await Future.delayed(const Duration(seconds: 2));
@@ -65,7 +62,7 @@ class StreamScreen extends HookConsumerWidget {
           capturing.value = false;
         }
       } catch (_) {}
-    }, INTERVAL_DURATION);
+    }, ref.watch(durationProvider));
 
     useValueChanged<bool, bool>(capturing.value, (_, __) {
       if (capturing.value) {
@@ -80,6 +77,17 @@ class StreamScreen extends HookConsumerWidget {
     useValueChanged<XFile?, XFile?>(lastImage.value, (_, __) {
       if (lastImage.value != null) {
         uploadImage(ref, lastImage.value!);
+      }
+      return null;
+    });
+
+    useValueChanged<bool, bool>(showViewFinder.value, (oldValue, activate) {
+      if (controller == null) return;
+
+      if (showViewFinder.value && controller!.value.isPreviewPaused) {
+        controller?.resumePreview();
+      } else if (!controller!.value.isPreviewPaused) {
+        controller?.pausePreview();
       }
       return null;
     });
@@ -99,7 +107,7 @@ class StreamScreen extends HookConsumerWidget {
         children: [
           AspectRatio(
             aspectRatio: 1.5,
-            child: capturing.value
+            child: capturing.value || showViewFinder.value
                 ? CameraPreview(controller!)
                 : Container(
                     color: Colors.black,
@@ -113,7 +121,11 @@ class StreamScreen extends HookConsumerWidget {
                 File(lastImage.value!.path),
                 fit: BoxFit.cover,
               ),
-            )
+            ),
+          TextButton(
+            onPressed: () => showViewFinder.value = !showViewFinder.value,
+            child: const Text('Toggle viewfinder'),
+          ),
         ],
       ),
     );
@@ -136,5 +148,33 @@ class StreamScreen extends HookConsumerWidget {
       token: ref.read(authProvider),
     );
     await uploadImageToUrl(uploadUrl, image);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (controller == null || !controller!.value.isInitialized) {
+      return;
+    }
+    if (state == AppLifecycleState.inactive) {
+      controller?.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      if (controller != null) {
+        onNewCameraSelected(controller!.description);
+      }
+    }
+  }
+
+  void onNewCameraSelected(CameraDescription cameraDescription) async {
+    if (controller != null) {
+      await controller!.dispose();
+    }
+    controller = CameraController(
+      cameraDescription,
+      ResolutionPreset.medium,
+    );
+
+    try {
+      await controller!.initialize();
+    } on CameraException catch (_) {}
   }
 }

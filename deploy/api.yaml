@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: slowtok-api
-          image: 'appademin/slowtok-api:0.0.1'
+          image: 'appademin/slowtok-api:0.0.4'
           imagePullPolicy: Always
           ports:
             - containerPort: 4000
