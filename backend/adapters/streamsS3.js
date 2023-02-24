@@ -21,13 +21,17 @@ const getStreamsByUserId = async userId => {
   const streamIds = await s3.listObjects({ prefix: `users/${userId}` })
   console.log({ streamIds, userId})
   return Promise.all(streamIds.map(async streamId => {
-    const Metadata = await s3.getMetadata({ key: `streams/${streamId}` })
-    return {
-      id: streamId,
-      // userId,
-      ...Metadata
+    try {
+      const Metadata = await s3.getMetadata({ key: `streams/${streamId}` })
+      return {
+        id: streamId,
+        // userId,
+        ...Metadata
+      }
+    } catch (e) {
+      return null
     }
-  }))
+  })).then(streams => streams.filter(stream => stream))
 }
 
 const getFeaturedStreams = async () => {
