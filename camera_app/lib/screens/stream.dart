@@ -80,9 +80,7 @@ class StreamScreen extends HookConsumerWidget {
     useValueChanged<XFile?, XFile?>(lastImage.value, (_, __) {
       if (lastImage.value != null) {
         // todo, schedule for retry
-        try {
-          uploadImage(ref, lastImage.value!);
-        } catch (_) {}
+        uploadImage(ref, lastImage.value!).catchError((_) {});
       }
       return null;
     });
