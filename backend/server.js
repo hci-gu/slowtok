@@ -109,7 +109,10 @@ const updateStream = async (req, res) => {
   const inputStream = req.body
   const stream = await streamsAdapter.getStream({ id: inputStream.id })
   if (stream.userid == req.user.id) {
-    await streamsAdapter.updateStream(inputStream)
+    await streamsAdapter.updateStream({
+      ...inputStream,
+      userid: req.user.id,
+    })
     res.end()
   } else {
     res.status(401).end()

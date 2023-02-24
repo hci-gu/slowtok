@@ -45,7 +45,11 @@ const getFeaturedStreams = async () => {
 }
 
 const updateStream = async stream => {
-  return s3.setMetadata({ key: `streams/${stream.id}`, metadata: { title: stream.title, description: stream.description } })
+  return s3.setMetadata({ key: `streams/${stream.id}`, metadata: {
+    userid: stream.userid,
+    title: stream.title,
+    description: stream.description,
+  } })
 }
 
 const deleteStream = async ({ stream }) => {
