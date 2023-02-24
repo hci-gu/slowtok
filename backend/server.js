@@ -163,7 +163,7 @@ const getFeatured = async (req, res) => {
   // })))
   // res.json(streamsWithLatest)
   const stream = await streamsAdapter.getStream({ id: 'f68fedc5-39e0-4d2a-b863-529930b69186' })
-  const latest = await s3Adapter.getLatest(stream.id)
+  const latest = await s3Adapter.getLatest({ prefix: `streams/${stream.id}/` })
   res.json([{
     ...stream,
     latest,
