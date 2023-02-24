@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slowtok_camera/api.dart';
+import 'package:camera/camera.dart';
 
 class Storage {
   late SharedPreferences prefs;
@@ -41,4 +42,7 @@ final streamsProvider = FutureProvider<List<Stream>>((ref) {
 final streamProvider = StateProvider<Stream?>((ref) => null);
 
 final durationProvider =
-    StateProvider<Duration>((ref) => const Duration(minutes: 5));
+    StateProvider<Duration>((ref) => const Duration(minutes: 1));
+
+final cameraControllerProvider =
+    StateProvider<CameraController?>((ref) => null);

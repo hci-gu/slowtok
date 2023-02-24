@@ -24,49 +24,52 @@ void useInterval(VoidCallback callback, Duration delay) {
 // ignore: must_be_immutable
 class StreamScreen extends HookConsumerWidget {
   final Stream stream;
-  CameraController? controller;
+  // CameraController? controller;
   StreamScreen(this.stream, {super.key});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ValueNotifier<bool> showViewFinder = useState(true);
-    ValueNotifier<bool> hasAccess = useState(false);
     ValueNotifier<bool> capturing = useState(false);
     ValueNotifier<XFile?> lastImage = useState(null);
     ValueNotifier<int> imagesTaken = useState(0);
+    CameraController? controller = ref.watch(cameraControllerProvider);
 
-    useEffect(() {
-      controller = CameraController(cameras[0], ResolutionPreset.medium);
-      controller!.initialize().then((_) {
-        hasAccess.value = true;
-      });
-      return () {
-        controller?.dispose();
-      };
-    }, []);
+    // useEffect(() {
+    //   controller = CameraController(cameras[1], ResolutionPreset.medium);
+    //   controller!.initialize().then((_) {
+    //     hasAccess.value = true;
+    //   });
+    //   return () {
+    //     controller?.dispose();
+    //   };
+    // }, []);
 
     useInterval(() async {
-      if (!hasAccess.value || controller == null) return;
+      if (controller == null) return;
 
       try {
-        if (controller?.value != null && controller!.value.isPreviewPaused) {
-          await controller!.resumePreview();
+        if (controller.value.isPreviewPaused) {
+          await controller.resumePreview();
           // give the camera some time to focus
           await Future.delayed(const Duration(seconds: 2));
-          capturing.value = true;
         }
+        capturing.value = true;
         await Future.delayed(const Duration(seconds: 5));
-        if (controller?.value != null && !controller!.value.isPreviewPaused) {
-          controller?.pausePreview();
-          capturing.value = false;
+        // ignore: unnecessary_null_comparison
+        if (controller != null &&
+            !controller.value.isPreviewPaused &&
+            !showViewFinder.value) {
+          controller.pausePreview();
         }
+        capturing.value = false;
       } catch (_) {}
     }, ref.watch(durationProvider));
 
     useValueChanged<bool, bool>(capturing.value, (_, __) {
       if (capturing.value) {
-        takePicture().then((image) {
+        takePicture(controller).then((image) {
           lastImage.value = image;
           imagesTaken.value++;
         }).catchError((_) {});
@@ -105,13 +108,23 @@ class StreamScreen extends HookConsumerWidget {
       ),
       body: Column(
         children: [
-          AspectRatio(
-            aspectRatio: 1.5,
-            child: capturing.value || showViewFinder.value
-                ? CameraPreview(controller!)
-                : Container(
-                    color: Colors.black,
-                  ),
+          _cameraChoice(ref, showViewFinder.value),
+          GestureDetector(
+            child: SizedBox(
+              height: 200,
+              child: controller != null &&
+                      (capturing.value || showViewFinder.value)
+                  ? CameraPreview(controller)
+                  : Container(
+                      color: Colors.white,
+                      child: const Center(
+                        child: Text('Click to show viewfinder'),
+                      ),
+                    ),
+            ),
+            onTap: () {
+              showViewFinder.value = !showViewFinder.value;
+            },
           ),
           Text('Images taken: ${imagesTaken.value}'),
           if (lastImage.value != null)
@@ -122,16 +135,34 @@ class StreamScreen extends HookConsumerWidget {
                 fit: BoxFit.cover,
               ),
             ),
-          TextButton(
-            onPressed: () => showViewFinder.value = !showViewFinder.value,
-            child: const Text('Toggle viewfinder'),
-          ),
         ],
       ),
     );
   }
 
-  Future<XFile?> takePicture() async {
+  Widget _cameraChoice(WidgetRef ref, bool showViewFinder) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        for (var camera in cameras)
+          TextButton(
+            onPressed: () async {
+              try {
+                await onNewCameraSelected(ref, camera);
+                // if (showViewFinder) {
+                //   ref.read(cameraControllerProvider)?.resumePreview();
+                // }
+              } catch (e) {
+                print(e);
+              }
+            },
+            child: Text(camera.lensDirection.toString()),
+          ),
+      ],
+    );
+  }
+
+  Future<XFile?> takePicture(CameraController? controller) async {
     XFile? file = await controller?.takePicture();
     if (file == null) return null;
     Uint8List bytes = await file.readAsBytes();
@@ -152,29 +183,33 @@ class StreamScreen extends HookConsumerWidget {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (controller == null || !controller!.value.isInitialized) {
-      return;
-    }
-    if (state == AppLifecycleState.inactive) {
-      controller?.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      if (controller != null) {
-        onNewCameraSelected(controller!.description);
-      }
-    }
+    // if (controller == null || !controller!.value.isInitialized) {
+    //   return;
+    // }
+    // if (state == AppLifecycleState.inactive) {
+    //   controller?.dispose();
+    // } else if (state == AppLifecycleState.resumed) {
+    //   if (controller != null) {
+    //     onNewCameraSelected(controller!.description);
+    //   }
+    // }
   }
 
-  void onNewCameraSelected(CameraDescription cameraDescription) async {
-    if (controller != null) {
-      await controller!.dispose();
-    }
-    controller = CameraController(
+  Future<void> onNewCameraSelected(
+      WidgetRef ref, CameraDescription cameraDescription) async {
+    await ref.read(cameraControllerProvider)?.dispose();
+    // if (controller != null) {
+    //   await controller!.dispose();
+    // }
+    var controller = CameraController(
       cameraDescription,
       ResolutionPreset.medium,
     );
 
     try {
-      await controller!.initialize();
+      await controller.initialize();
     } on CameraException catch (_) {}
+
+    ref.read(cameraControllerProvider.notifier).state = controller;
   }
 }
