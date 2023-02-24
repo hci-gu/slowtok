@@ -162,7 +162,12 @@ const getFeatured = async (req, res) => {
   //   latest: await s3Adapter.getLatest(stream.id),
   // })))
   // res.json(streamsWithLatest)
-  res.json([])
+  const stream = await streamsAdapter.getStream({ id: 'f68fedc5-39e0-4d2a-b863-529930b69186' })
+  const latest = await s3Adapter.getLatest(stream.id)
+  res.json([{
+    ...stream,
+    latest,
+  }])
 }
 
 const deleteStream = async (req, res) => {
