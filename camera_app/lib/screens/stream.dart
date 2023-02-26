@@ -110,6 +110,18 @@ class StreamScreen extends HookConsumerWidget {
       body: Column(
         children: [
           _cameraChoice(ref, showViewFinder.value),
+          // slider for duration
+          Slider(
+            value: ref.watch(durationProvider).inMinutes.toDouble(),
+            min: 1,
+            max: 60,
+            divisions: 59,
+            label: ref.watch(durationProvider).inMinutes.toString(),
+            onChanged: (value) {
+              ref.read(durationProvider.notifier).state =
+                  Duration(minutes: value.toInt());
+            },
+          ),
           GestureDetector(
             child: SizedBox(
               height: 200,
