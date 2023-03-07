@@ -1,21 +1,16 @@
 import Link from 'next/link'
 import dayjs from 'dayjs'
 
-import Anim from './Anim'
-
 import useStreamInfo from '../hooks/api/useStreamInfo'
 import useImages from '../hooks/api/useImages'
 
-import {
-  FaEdit,
-  FaCloudUploadAlt,
-} from 'react-icons/fa'
+import { FaEdit, FaCloudUploadAlt } from 'react-icons/fa'
 import NoImagesYet from './NoImagesYet'
 
 import styles from '../styles/Stream.module.css'
+import StreamPlayer from './StreamPlayer'
 
 const Description = ({ children }) => {
-  console.log(children)
   return children.split('\n\n').map((para, i) => <p key={i}>{para}</p>)
 }
 
@@ -30,21 +25,36 @@ const Stream = ({ streamId }) => {
 
   const showTo = dayjs(info?.latest?.time)
   const showFrom = dayjs(showTo).subtract(days, 'day')
-  const showImages = images.filter(({ time }) => dayjs(time).isBetween(showFrom, showTo, null, '[]'))
+  const showImages = images.filter(({ time }) =>
+    dayjs(time).isBetween(showFrom, showTo, null, '[]')
+  )
 
-  return <div className={styles.container}>
+  return (
+    <div className={styles.container}>
       <h1>
-        { info?.title }
-        { info?.owner && <>
-          <Link href={`/streams/edit?id=${streamId}`}><span className={styles.actionIcon}><FaEdit /></span></Link>
-          <Link href={`/streams/upload?id=${streamId}`}><span className={styles.actionIcon}><FaCloudUploadAlt /></span></Link>
-        </> }
-        
-      </h1>      
-      { showImages.length > 0 ? <Anim images={showImages} /> : null}
-      { showImages.length == 0 && info?.owner && <NoImagesYet streamId={ streamId } />}
-      { info && <Description>{info.description}</Description> }
+        {info?.title}
+        {info?.owner && (
+          <>
+            <Link href={`/streams/edit?id=${streamId}`}>
+              <span className={styles.actionIcon}>
+                <FaEdit />
+              </span>
+            </Link>
+            <Link href={`/streams/upload?id=${streamId}`}>
+              <span className={styles.actionIcon}>
+                <FaCloudUploadAlt />
+              </span>
+            </Link>
+          </>
+        )}
+      </h1>
+      {showImages.length > 0 ? <StreamPlayer images={showImages} /> : null}
+      {showImages.length == 0 && info?.owner && (
+        <NoImagesYet streamId={streamId} />
+      )}
+      {info && <Description>{info.description}</Description>}
     </div>
+  )
 }
 
 export default Stream
